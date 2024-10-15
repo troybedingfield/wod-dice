@@ -1,0 +1,50 @@
+.rolls {
+    display: flex;
+    gap: 6px;
+}
+
+
+form {
+    display: flex;
+    gap: 6px;
+}
+
+form div {
+    display: flex;
+    flex-direction: column;
+
+    label {
+        display: flex;
+    }
+}
+
+.dieBreakdown {
+    display: flex;
+    gap: 24px;
+}
+
+.dieSet {
+    display: flex;
+    flex-direction: column;
+
+    div {
+        display: flex;
+    }
+}
+
+.statsContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.stats {
+    display: flex;
+    max-width: 250px;
+    flex-direction: column;
+
+    div {
+        display: flex;
+        justify-content: right;
+    }
+}

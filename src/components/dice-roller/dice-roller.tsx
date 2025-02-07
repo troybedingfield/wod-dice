@@ -10,51 +10,56 @@ export default function DiceRoller() {
     const [diceTotal, setDiceTotal] = useState(Number);
     const [rolledDice, setRolledDice] = useState<number[]>([])
     const [rolledHunger, setRolledHunger] = useState<number[]>([])
+    const [rouse, setRouse] = useState(Number);
 
-    function handleNum1(e: any, num: number) {
-        console.log(e)
+    function handleNum1(num: number) {
+
         console.log(num)
         setNum1(num);
     }
 
-    function handleNum2(e: any, num: number) {
-        console.log(e)
+    function handleNum2(num: number) {
+
         console.log(num)
         setNum2(num);
     }
 
-    function handleMods(e: any, num: number) {
-        console.log(e)
+    function handleMods(num: number) {
+
         console.log(num)
         setMods(num);
     }
 
-    function handleDiff(e: any, num: number) {
-        console.log(e)
+    function handleDiff(num: number) {
+
         console.log(num)
         setDiff(num);
     }
 
-    function handleHunger(e: any, num: number) {
-        console.log(e)
+    function handleHunger(num: number) {
+
         console.log(num)
         setHunger(num);
     }
 
-    function handleDiceRoll(event: any, num1: number, num2: number, mods: number, hunger: number) {
+    function handleDiceRoll(event: React.MouseEvent<Element, MouseEvent>, num1: number, num2: number, mods: number, hunger: number) {
         event.preventDefault();
-        let total = num1 + num2 + mods - hunger
+        if (rouse > 0) {
+            setRouse(0);
+        }
+        console.log(event);
+        const total = num1 + num2 + mods - hunger
         console.log(total)
         setDiceTotal(total + hunger)
 
 
-        let rolledDiceArray = [];
+        const rolledDiceArray = [];
         for (let i = 0; i < total; i++) {
             rolledDiceArray.push(Math.floor(Math.random()
                 * 10) + 1);
         }
 
-        let rolledHungerArray = [];
+        const rolledHungerArray = [];
         for (let i = 0; i < hunger; i++) {
             rolledHungerArray.push(Math.floor(Math.random()
                 * 10) + 1);
@@ -65,7 +70,7 @@ export default function DiceRoller() {
     }
 
     function countPairs(ar: number[]) {
-        var obj: number[] = [];
+        const obj: number[] = [];
 
         ar.forEach(item => {
             obj[item] = obj[item] ? obj[item] + 1 : 1;
@@ -79,10 +84,10 @@ export default function DiceRoller() {
 
     function arrCompare(arr1: number[], arr2: number[]) {
 
-        var ret = [];
+        const ret = [];
         arr1.sort();
         arr2.sort();
-        for (var i = 0; i < arr1.length; i += 1) {
+        for (let i = 0; i < arr1.length; i += 1) {
             if (arr2.indexOf(arr1[i]) > -1) {
                 ret.push(arr1[i]);
             }
@@ -90,10 +95,79 @@ export default function DiceRoller() {
         return ret;
     }
 
+    function handleRouse(event: React.MouseEvent<Element, MouseEvent>) {
+        event.preventDefault();
+        clear();
+        let rouse = Math.floor(Math.random()
+            * 10) + 1
+
+        setDiceTotal(1);
+
+        setRolledDice([rouse]);
+
+        setRouse(rouse);
+    }
+
+    function handleClear(event: React.MouseEvent<Element, MouseEvent>) {
+        event.preventDefault();
+        clear();
+    }
+
+    function clear() {
+        setNum1(0);
+        setNum2(0);
+        setMods(0);
+        setHunger(0);
+        setDiff(0);
+        setDiceTotal(0);
+        setRolledDice([]);
+        setRolledHunger([]);
+        setRouse(0);
+    }
+
+    function handleWillpowerReroll(event: React.MouseEvent<Element, MouseEvent>) {
+        event.preventDefault();
+
+        // let rerollPool = rolledDice.filter((num) =>
+        //     num < 6
+        // )
+
+        let diceToBeRerolled: number[] = [];
+
+        rolledDice.forEach(item => diceToBeRerolled.push(item))
+
+        const filterCondition = (num: number) => num < 6;
+
+        const filteredIndices = diceToBeRerolled
+            .map((element, index) => (filterCondition(element) ? index : -1))
+            .filter((index) => index !== -1);
+
+        // rerollPool.forEach((item, index) => {
+        //     console.log(item, index - 1)
+        // })
+
+        let indexsToReplace: number[] = filteredIndices
+
+
+
+        let trimmedIndexes = indexsToReplace.splice(0, 3);
+
+        trimmedIndexes.forEach((element) => {
+            console.log(element);
+            let rerolledNum = Math.floor(Math.random()
+                * 10) + 1
+            diceToBeRerolled[element] = rerolledNum;
+        })
+
+        console.log(diceToBeRerolled)
+
+        setRolledDice(diceToBeRerolled);
+    }
+
 
     return (
 
-        <>
+        <div className="diceRollContainer">
             <div>Dice Roller</div>
             <div className="statsContainer">
                 <div className="stats">
@@ -103,6 +177,7 @@ export default function DiceRoller() {
                     <div>Hunger: {hunger}</div>
                     <div>Difficulty: {diff}</div>
                     <div>Dice Pool: {diceTotal}</div>
+                    <div>Rouse: {rouse}</div>
                 </div>
             </div>
 
@@ -138,10 +213,47 @@ export default function DiceRoller() {
                 ).length + rolledHunger.filter((num) =>
                     num >= 6
 
-                ).length) >= diff &&
+                ).length) >= diff && (rolledDice.length + rolledHunger.length) > 0 &&
 
                 <div>
-                    Successes!({rolledDice.filter((num) =>
+                    {diff > 0 && <span>Successes!</span>}
+
+                    {
+                        (rolledDice.filter((num) =>
+                            num >= 6
+
+                        ).length + rolledHunger.filter((num) =>
+                            num >= 6
+
+                        ).length) > diff &&
+
+                        <span>
+                            {diff == 0 && (rolledDice.filter((num) =>
+                                num >= 6
+
+                            ).length + rolledHunger.filter((num) =>
+                                num >= 6
+
+                            ).length) > diff && "Successes!"}
+                        </span>
+                    }
+                    <span>
+                        {
+                            diff == 0 && (rolledDice.filter((num) =>
+                                num >= 6
+
+                            ).length + rolledHunger.filter((num) =>
+                                num >= 6
+
+                            ).length) == 0 && (rolledDice.length + rolledHunger.length) > 0 &&
+
+
+                            "Failure!"
+
+                        }
+                    </span>
+
+                    ({rolledDice.filter((num) =>
                         num >= 6
 
                     ).length + rolledHunger.filter((num) =>
@@ -186,7 +298,7 @@ export default function DiceRoller() {
                 ).length + rolledHunger.filter((num) =>
                     num >= 6
 
-                ).length) < diff &&
+                ).length) < diff && rolledDice.length + rolledHunger.length > 1 &&
 
                 <div>
                     Failure!({rolledDice.filter((num) =>
@@ -217,29 +329,41 @@ export default function DiceRoller() {
 
 
 
-            <form action="">
-                <div>
-                    <label htmlFor="attribute">Attribute/Skill</label>
-                    <input type="number" value={num1} onChange={(e) => handleNum1(e, e.target.valueAsNumber)}></input>
+
+
+
+
+            <form action="" className="flex flex-col">
+                <div className="flex flex-row gap-4">
+                    <div className="flex flex-col">
+                        <label htmlFor="attribute">Attribute/Skill</label>
+                        <input type="number" min="0" value={num1} onChange={(e) => handleNum1(e.target.valueAsNumber)}></input>
+                    </div>
+                    <div className="flex flex-col">
+                        <label htmlFor="skill">Attribute/Skill</label>
+                        <input type="number" min="0" value={num2} onChange={(e) => handleNum2(e.target.valueAsNumber)}></input>
+                    </div>
+                    <div className="flex flex-col">
+                        <label htmlFor="mods">Modifiers</label>
+                        <input type="number" min="0" value={mods} onChange={(e) => handleMods(e.target.valueAsNumber)}></input>
+                    </div>
+                    <div className="flex flex-col">
+                        <label htmlFor="hunger">Hunger</label>
+                        <input type="number" min="0" value={hunger} onChange={(e) => handleHunger(e.target.valueAsNumber)}></input>
+                    </div>
+                    <div className="flex flex-col">
+                        <label htmlFor="difficulty">Difficulty</label>
+                        <input type="number" min="0" value={diff} onChange={(e) => handleDiff(e.target.valueAsNumber)}></input>
+                    </div>
                 </div>
-                <div>
-                    <label htmlFor="skill">Attribute/Skill</label>
-                    <input type="number" value={num2} onChange={(e) => handleNum2(e, e.target.valueAsNumber)}></input>
+
+                <div className="flex gap-4">
+                    <button onClick={(e: any) => handleDiceRoll(e, num1, num2, mods, hunger)}>Roll</button>
+                    <button onClick={(e: any) => handleWillpowerReroll(e)}>Willpower Reroll</button>
+                    <button onClick={(e: any) => handleRouse(e)}>Rouse</button>
+                    <button onClick={(e: any) => handleClear(e)}>Clear</button>
                 </div>
-                <div>
-                    <label htmlFor="mods">Modifiers</label>
-                    <input type="number" value={mods} onChange={(e) => handleMods(e, e.target.valueAsNumber)}></input>
-                </div>
-                <div>
-                    <label htmlFor="hunger">Hunger</label>
-                    <input type="number" value={hunger} onChange={(e) => handleHunger(e, e.target.valueAsNumber)}></input>
-                </div>
-                <div>
-                    <label htmlFor="difficulty">Difficulty</label>
-                    <input type="number" value={diff} onChange={(e) => handleDiff(e, e.target.valueAsNumber)}></input>
-                </div>
-                <button type="submit" onClick={(e) => handleDiceRoll(e, num1, num2, mods, hunger)}>Roll</button>
             </form>
-        </>
+        </div>
     )
 }
